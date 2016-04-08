@@ -1,0 +1,20 @@
+{
+    "collab_server" : "",
+    "contents" : "\n# This is the server logic for a Shiny web application.\n# You can find out more about building applications with Shiny here:\n#\n# http://shiny.rstudio.com\n#\n\nlibrary(shiny)\nlibrary(ggplot2)\nsource(\"helpers.R\")\n\n\nshinyServer(function(input, output) {\n  \n  loadData <- reactive({\n    input$btnReload\n    output$txtLastReload <- renderText({\n      paste(\"Last Reload was on \",\n            Sys.time(), \" Server Time\")\n    })\n    fullData()\n  })\n  \n  makeFit <- reactive({\n    fitting(data = loadData())\n  })\n  \n  targets <- reactive({\n    targets <- unique(loadData()$target)\n    return(targets[targets != -1])\n  })\n  \n  substrates <- reactive({\n    subs <- levels(loadData()$substrate)\n    return(c(\"All\", subs))\n  })\n  \n  # renders the options for target height\n  output$target = renderUI({\n    selectInput('hTarget', 'Target Height', targets())\n  })\n  \n  # renders the options for the substrate\n  output$substrate = renderUI({\n    selectInput('substrate', 'Substrate used', substrates())\n  })\n  \n  # Generate a summary of the fit\n  output$summary <- renderTable({\n    my_table <- as.data.frame(round(summary(makeFit())$coef,digits = 3))\n    return(my_table)\n  })\n  \n  output$txtNeededSpeed <- renderText({\n    speed <- (makeFit()$m$getPars()[1] * (as.numeric(input$selConc)^makeFit()$m$getPars()[2]) / (as.numeric(input$sldHeight) * (as.numeric(input$selTime)^makeFit()$m$getPars()[4]) ) )^(1/makeFit()$m$getPars()[3])\n    paste(\"The speed you will need is \", round(speed, digits = 0), \"rpm\")\n  })\n  \n  output$txtResults <- renderText({\n    x <- subsetData(hTarget = input$hTarget, \n                    tSubstrate = input$substrate, \n                    data = loadData())\n    paste(\"Mean: \", round(mean(x$thickness),digits = 2), \"nm\", \n          \"+/-\", round(sd(x$thickness),digits = 2), \"nm\", \n          \"(\", round((sd(x$thickness)/mean(x$thickness))*100,digits = 2), \" %)\",\n          \" from \", length(x$thickness), \" samples\")\n  })\n  \n  output$histogram <- renderPlot({\n    x <- subsetData(hTarget = input$hTarget, \n                    tSubstrate = input$substrate, \n                    data = loadData())\n    gg <- ggplot(x, aes(x=thickness)) + \n      geom_histogram(binwidth=1, colour=I(\"blue\"), \n                     aes(y=..density.., fill=..count..)) + \n      scale_fill_gradient(\"Count\", low=\"lightblue\", high=\"darkblue\") + \n      stat_function(fun=dnorm, color=\"red\", args=list(mean=mean(x$thickness), \n                                                      sd=sd(x$thickness)))\n    gg\n  })\n})\n",
+    "created" : 1458649964856.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "343289551",
+    "id" : "42E6260",
+    "lastKnownWriteTime" : 1459948399,
+    "last_content_update" : 1459948399617,
+    "path" : "~/R/Shiny/spin_coating/server.R",
+    "project_path" : "server.R",
+    "properties" : {
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

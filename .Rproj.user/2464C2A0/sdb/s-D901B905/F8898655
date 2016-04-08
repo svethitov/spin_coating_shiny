@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "# loading libraries\nlibrary(googlesheets)\nsuppressMessages(library(dplyr))\n\n#function that gets the data from the google sheets\nfullData <- function(){\n  sheet <- gs_url(\"https://docs.google.com/spreadsheets/d/18NUQKoGEH3fFEj26mAsbmoPHN87oRtiwZrEp0dtkKIc/edit?usp=sharing\")\n  my_data <- gs_read(sheet)\n  my_data$date <- as.Date(my_data$date, \"%d/%m/%Y\")\n  my_data$substrate <- as.factor(my_data$substrate)\n  return(my_data)\n}\n\n# function that subsets data frame for histograms\nsubsetData <- function(hTarget, tSubstrate, data){\n  if (tSubstrate == \"All\") {\n    x <- subset(data, \n                target == as.numeric(hTarget), \n                select = \"thickness\")\n  }\n  else {\n    x <- subset(data, \n                target == as.numeric(hTarget) & substrate == tSubstrate, \n                select = \"thickness\")\n  }\n  return(x)\n}\n\n# function that makes fitting of the function\nfitting <- function(data = fullData){\n  a <- 300\n  n <- 1\n  alpha <- -0.3\n  tau <- -0.1\n  fit <- nls(thickness ~ a * concentration^n / ( angular_momentum^alpha * spin_time^tau ), \n             data = data , start=list(a=a,n=n,alpha=alpha,tau=tau))\n  return(fit)\n}\n\n",
+    "created" : 1459853126130.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1350534977",
+    "id" : "F8898655",
+    "lastKnownWriteTime" : 1459947439,
+    "last_content_update" : 1459947439583,
+    "path" : "~/R/Shiny/spin_coating/helpers.R",
+    "project_path" : "helpers.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
